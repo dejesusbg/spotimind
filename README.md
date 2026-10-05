@@ -91,7 +91,7 @@ cd frontend && npm run dev
 
 - **Colab** notebooks for the GPU part: TRIBE v2, nilearn, nibabel.
 - **FastAPI** backend that loads everything into memory: neighbors, a binary timeline endpoint, audio streaming with seeking, embedded cover art, and Gemini via the Google GenAI SDK. 25 pytest tests run against generated mock data.
-- **Next.js 16** with **react-three-fiber**: the cortex recolors every frame from typed arrays, with no allocations in the render loop. The design follows [`DESIGN.md`](DESIGN.md).
+- **Next.js 16** with **react-three-fiber**: the cortex recolors every frame from typed arrays, with no allocations in the render loop. The look is inspired by Spotify's dark player.
 
 ```
 notebooks/   00_phase0_feasibility (what TRIBE actually outputs, speed, sanity checks), 01_embed_catalog
