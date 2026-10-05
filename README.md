@@ -70,18 +70,18 @@ Tests: `cd backend && uv run pytest` (they generate their own mock data).
 
 ### 1. Colab (free T4, ~25 s per song)
 
-1. Put your mp3s in a Google Drive folder. The notebook defaults to `MyDrive/brain-mind/` (change `AUDIO_DIR` in cell C1).
+1. Put your mp3s in a Google Drive folder. The notebook defaults to `MyDrive/spotimind/audio/` (change `AUDIO_DIR` in cell C1).
 2. Open `notebooks/01_embed_catalog.ipynb` in Colab and pick **Runtime → Change runtime type → T4 GPU**.
 3. Run the install cell. It installs TRIBE v2 at a pinned commit, then forces `torch==2.6.0 torchaudio==2.6.0 numpy==2.2.6` and **restarts the runtime** (expected). The older "pin numpy<2.1" advice no longer applies: tribev2 itself pins numpy 2.2.6.
 4. **Hugging Face token: not needed.** Audio-only inference skips the gated LLaMA text model (verified in Phase 0). Only `facebook/tribev2` and `facebook/w2v-bert-2.0` are downloaded, and both are public. If you later add the text/video branches you'll need an HF token with access to `meta-llama/Llama-3.2-3B`; add it with Colab's **Secrets** panel, never in a cell.
 5. Mount Drive. If the `drive.mount()` popup fails, use the **Files sidebar → Mount Drive** button instead.
-6. Run the cells in order. The catalog cell runs in a background thread; poll it with the progress cell. Each finished song is checkpointed to `MyDrive/brain-mind-output/work/{id}.npz`, so if Colab disconnects, rerun everything and finished songs are skipped.
-7. The last cells write `MyDrive/brain-mind-output/data/` and a `spotimind_data.zip`, and print neighbors for three random songs in both spaces.
+6. Run the cells in order. The catalog cell runs in a background thread; poll it with the progress cell. Each finished song is checkpointed to `MyDrive/spotimind/output/work/{id}.npz`, so if Colab disconnects, rerun everything and finished songs are skipped.
+7. The last cells write `MyDrive/spotimind/output/data/` and a `spotimind_data.zip`, and print neighbors for three random songs in both spaces.
 
 ### 2. Copy the results to the repo
 
 ```bash
-# download spotimind_data.zip from MyDrive/brain-mind-output/ (Drive web UI), then:
+# download spotimind_data.zip from MyDrive/spotimind/output/ (Drive web UI), then:
 mkdir -p data && unzip -o ~/Downloads/spotimind_data.zip -d data
 # the cortex mesh is exported locally (once):
 uv run --with nilearn --with nibabel scripts/export_mesh.py --out data/mesh
