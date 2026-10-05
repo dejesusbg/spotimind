@@ -29,3 +29,6 @@ node_modules/
 .ipynb_checkpoints/
 .cache/
 mock/
+
+CLAUDE.md
+DESIGN.md
