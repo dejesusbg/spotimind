@@ -1,0 +1,19 @@
+[project]
+name = "spotimind-backend"
+version = "0.1.0"
+description = "Spotimind local API: songs, brain/audio neighbors, timelines, mesh, audio streaming"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.30",
+  "numpy>=1.26",
+  "google-genai>=1.0",
+  "mutagen>=1.47",
+]
+
+[dependency-groups]
+dev = ["pytest>=8", "httpx>=0.27"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

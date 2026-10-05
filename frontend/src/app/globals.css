@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+/* Design tokens from DESIGN.md (Spotify-inspired): near-black surfaces, one functional green accent. */
+:root {
+  --bg: #121212;
+  --surface: #181818;
+  --surface-2: #1f1f1f;
+  --card: #252525;
+  --text: #ffffff;
+  --text-muted: #b3b3b3;
+  --text-soft: #cbcbcb;
+  --border: #4d4d4d;
+  --border-light: #7c7c7c;
+  --green: #1ed760;
+  --green-border: #1db954;
+  --negative: #f3727f;
+  --warning: #ffa42b;
+  --info: #539df5;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-card: var(--card);
+  --color-muted: var(--text-muted);
+  --color-soft: var(--text-soft);
+  --color-line: var(--border);
+  --color-line-light: var(--border-light);
+  --color-green: var(--green);
+  --color-negative: var(--negative);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --font-sans: var(--font-figtree);
+  --font-mono: var(--font-geist-mono);
+  --shadow-card: rgba(0, 0, 0, 0.3) 0px 8px 8px;
+  --shadow-heavy: rgba(0, 0, 0, 0.5) 0px 8px 24px;
+  --shadow-inset: rgb(18, 18, 18) 0px 1px 0px, rgb(124, 124, 124) 0px 0px 0px 1px inset;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-figtree), "Helvetica Neue", helvetica, arial, "Hiragino Sans", sans-serif;
+}
+
+/* Thin dark scrollbars */
+* { scrollbar-width: thin; scrollbar-color: #4d4d4d transparent; }
+
+/* Seek / range input: white track that turns green on hover, like a music player */
+input[type="range"].seek {
+  -webkit-appearance: none; appearance: none; height: 4px; border-radius: 9999px; cursor: pointer;
+  background: linear-gradient(to right, var(--text) var(--fill, 0%), #4d4d4d var(--fill, 0%));
+}
+input[type="range"].seek:hover { background: linear-gradient(to right, var(--green) var(--fill, 0%), #4d4d4d var(--fill, 0%)); }
+input[type="range"].seek::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #fff; opacity: 0;
+  box-shadow: rgba(0, 0, 0, 0.5) 0px 2px 4px;
+}
+input[type="range"].seek:hover::-webkit-slider-thumb { opacity: 1; }
+input[type="range"].seek::-moz-range-thumb { width: 12px; height: 12px; border: 0; border-radius: 50%; background: #fff; }
