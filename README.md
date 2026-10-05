@@ -1,118 +1,115 @@
 # Spotimind
 
-Match songs by how a brain is *predicted* to respond to them, instead of by tags like tempo or genre.
+Find songs that feel alike by how a brain is predicted to respond to them, not by tempo or genre.
 
-Spotimind runs Meta's open brain-encoding model [TRIBE v2](https://github.com/facebookresearch/tribev2) on a local music catalog. For every second of a song it predicts the fMRI response of an average human cortex (20,484 surface points), reduces that to 400 brain regions, and summarizes each song as a "brain-response fingerprint". Songs are matched by cosine similarity of those fingerprints. The app plays a song while a 3D cortex lights up in sync, and shows the brain-space neighbors next to neighbors from a plain audio embedding (Wav2Vec-BERT), so you can see whether brain space actually groups songs differently.
+Streaming apps decide two songs are alike from numbers like tempo, energy or who sings them. That's how you end up with songs that match on paper and feel nothing alike. I wanted to try the opposite: ask a model of the human brain how it would react to each song, second by second, and match songs by *that*.
 
-Inspired by [Reeled In](https://github.com/sxnnywu/reeled-in) (TRIBE v2 for short-form video) and a TRIBE-on-songs demo by @Baconbrix.
+The model is Meta's [TRIBE v2](https://github.com/facebookresearch/tribev2), which predicts fMRI brain activity from audio without a scanner. It runs once over your songs on a free Colab GPU. After that, the app runs on your laptop, no GPU needed.
+
+![Spotimind showing Laufey's How I Get, its predicted brain response on a 3D cortex and its brain networks](docs/screenshot.jpg)
+
+## What you see
+
+- **A 3D brain that lights up with the song.** Press play and the cortex follows the music, one predicted reading per second, smoothly interpolated.
+- **Brain networks.** How much each of 8 networks (auditory, visual, attention, default mode…) responds on average over the song, plus a green marker for *right now*.
+- **Two kinds of neighbors, side by side.** On the left, the songs whose predicted brain response is most similar. On the right, the songs that simply *sound* most similar (raw audio features). Songs in both lists are marked, with a count of how much the lists agree.
+- **Compare.** Overlay a neighbor's networks on top of the current song's.
+- **Why?** Gemini explains a match using only the computed numbers: which networks agree, which don't, and what those networks are usually associated with. It's labelled *interpretation, not a measurement*, because that's what it is.
+
+## What I found
+
+I ran it on 101 of my own songs: 38 minutes on a free T4, no failures.
+
+- **The raw sound mostly finds the same artist.** Laufey's *How I Get* gets three more Laufey songs as its audio neighbors.
+- **The brain view crosses artists and languages.** The same song's brain neighbors are Olivia Rodrigo's *traitor* and *drivers license*, and Chase Elliott's *unless you leave*.
+- **The two views overlap, but not much.** On average 14% of the top-10 neighbors are shared (Jaccard 0.138), against about 5% for random lists. They're related, but they're clearly not the same thing.
+
+![Brain-space and audio neighbors side by side, with a Gemini explanation of one match](docs/neighbors.jpg)
 
 ## Honest limits
 
-- **Average brain, not yours.** TRIBE v2 predicts the response of an averaged subject. It says nothing about personal taste.
-- **Not trained on music.** The model learned from fMRI recorded during movies and audiobooks. Results on music are directional. In our Phase 0 check, music clearly raised auditory cortex, but lateral occipital (visual) areas rose even more, most likely a cross-modal habit learned from movies.
-- **Slow and smeared.** One reading per second, blurred by a few seconds. Trust shapes over seconds, not beats.
-- **A proxy.** Brain-space similarity is a hypothesis about "feels alike", not a measurement of it. The side-by-side audio baseline is there to keep it honest.
-- **Explanations are interpretations.** The optional Gemini "why do these match?" text is generated only from the computed numbers and labelled "Interpretation, not a measurement".
+- **An average brain, not yours.** TRIBE v2 predicts the response of an averaged person. It says nothing about your taste.
+- **Not trained on music.** It learned from people watching movies and listening to audiobooks. Music clearly lights up auditory cortex, but visual areas light up too, most likely a habit picked up from movies, where sounds come with something to see.
+- **Slow and blurry.** About one reading per second, smeared over a few seconds. Trust the shape of a song, not individual beats.
+- **A proxy.** "Similar predicted brain response" is a guess at "feels alike", not a measurement of it. The audio column is there to keep it honest.
 
-## License
+## Run it yourself
 
-TRIBE v2 code and weights are **CC BY-NC 4.0**. This is a non-commercial portfolio project. Never commit audio, model weights or API keys (see `.gitignore`).
+You need [uv](https://docs.astral.sh/uv/) and Node 20+.
 
-## How it works
-
-```
-mp3s (Google Drive) ──► Colab T4: TRIBE v2, audio only ──► data/ (npy + json) ──► FastAPI ──► Next.js + three.js
-```
-
-1. **Inference** (`notebooks/01_embed_catalog.ipynb`): each song (capped at 5 min) goes through TRIBE v2 audio-only → `[T seconds, 20484 vertices]`. The first 3 s and last 2 s are trimmed (model edge effects measured in Phase 0).
-2. **Parcels and networks**: vertices are averaged into the Schaefer-400 parcellation (native fsaverage5). Parcels are grouped into Yeo-7 networks, plus an auditory network carved out of somatomotor using the Destrieux auditory labels. All values are plain averages; see `data/networks.json` for every assumption.
-3. **Brain embedding**: per-parcel mean and std over time, plus 16 time bins of the network-level timeline. Each feature is z-scored across the catalog, each block L2-normalized, then the blocks are concatenated (928 dims).
-4. **Audio baseline**: TRIBE's own Wav2Vec-BERT 2.0 features (the model's audio input), mean-pooled over the same span (2048 dims).
-5. **App**: numpy cosine similarity, a binary timeline endpoint, and a react-three-fiber cortex recolored per frame from the parcel timeline.
-
-The full file and API spec is in [`docs/DATA_CONTRACT.md`](docs/DATA_CONTRACT.md). Phase 0 findings (install, output shape, lag, speed, sanity checks) are recorded at the top of [`notebooks/00_phase0_feasibility.ipynb`](notebooks/00_phase0_feasibility.ipynb).
-
-## Repo layout
-
-```
-docs/DATA_CONTRACT.md          file + API spec (single source of truth)
-notebooks/00_phase0_feasibility.ipynb
-notebooks/01_embed_catalog.ipynb
-scripts/export_mesh.py         cortex mesh + per-vertex parcel ids -> data/mesh/
-scripts/make_mock_data.py      synthetic data with the same schema -> mock/
-scripts/atlas.py               Schaefer/Yeo/Destrieux helpers
-backend/                       FastAPI app + pytest suite
-frontend/                      Next.js app
-data/   audio/   mock/         gitignored
-```
-
-## Run it on mock data (no GPU, no songs)
-
-Requires [uv](https://docs.astral.sh/uv/) and Node 20+.
+**Try it without songs or a GPU**
 
 ```bash
-# 1. synthetic data (real fsaverage5 mesh if online; add --no-real-mesh for an offline sphere)
-uv run --with numpy --with nilearn --with nibabel scripts/make_mock_data.py
+uv run --with numpy --with nilearn --with nibabel scripts/make_mock_data.py   # fake songs -> mock/
 
-# 2. backend on :8000
 cd backend
 SPOTIMIND_DATA_DIR=../mock/data SPOTIMIND_AUDIO_DIR=../mock/audio uv run uvicorn app.main:app --port 8000
 
-# 3. frontend on :3000 (another terminal)
-cd frontend && npm install && npm run dev
+cd frontend && npm install && npm run dev                                    # http://localhost:3000
 ```
 
-The UI shows a red **MOCK DATA** badge (driven by `meta.json`).
+It shows an orange **Mock data** badge so you never confuse it with the real thing.
 
-Tests: `cd backend && uv run pytest` (they generate their own mock data).
+**With your own songs**
 
-## Run it on your own songs
+1. Put your mp3s in Google Drive, in `MyDrive/spotimind/audio/`.
+2. Open [`notebooks/01_embed_catalog.ipynb`](notebooks/01_embed_catalog.ipynb) in Colab, and pick **Runtime → Change runtime type → T4 GPU**.
+3. Run the install cell. It restarts the runtime on purpose, so just continue with the next cell.
+4. Mount Drive. If the popup fails, use **Files sidebar → Mount Drive** instead.
+5. Run the rest. Every finished song is saved to `MyDrive/spotimind/output/work/`, so if Colab disconnects, rerun and it picks up where it stopped. The last cell downloads `spotimind_data.zip`.
 
-### 1. Colab (free T4, ~25 s per song)
+No Hugging Face token needed: the audio-only path never loads the gated text model.
 
-1. Put your mp3s in a Google Drive folder. The notebook defaults to `MyDrive/spotimind/audio/` (change `AUDIO_DIR` in cell C1).
-2. Open `notebooks/01_embed_catalog.ipynb` in Colab and pick **Runtime → Change runtime type → T4 GPU**.
-3. Run the install cell. It installs TRIBE v2 at a pinned commit, then forces `torch==2.6.0 torchaudio==2.6.0 numpy==2.2.6` and **restarts the runtime** (expected). The older "pin numpy<2.1" advice no longer applies: tribev2 itself pins numpy 2.2.6.
-4. **Hugging Face token: not needed.** Audio-only inference skips the gated LLaMA text model (verified in Phase 0). Only `facebook/tribev2` and `facebook/w2v-bert-2.0` are downloaded, and both are public. If you later add the text/video branches you'll need an HF token with access to `meta-llama/Llama-3.2-3B`; add it with Colab's **Secrets** panel, never in a cell.
-5. Mount Drive. If the `drive.mount()` popup fails, use the **Files sidebar → Mount Drive** button instead.
-6. Run the cells in order. The catalog cell runs in a background thread; poll it with the progress cell. Each finished song is checkpointed to `MyDrive/spotimind/output/work/{id}.npz`, so if Colab disconnects, rerun everything and finished songs are skipped.
-7. The last cells write `MyDrive/spotimind/output/data/` and a `spotimind_data.zip`, and print neighbors for three random songs in both spaces.
-
-### 2. Copy the results to the repo
+Then, in the repo:
 
 ```bash
-# download spotimind_data.zip from MyDrive/spotimind/output/ (Drive web UI), then:
-mkdir -p data && unzip -o ~/Downloads/spotimind_data.zip -d data
-# the cortex mesh is exported locally (once):
-uv run --with nilearn --with nibabel scripts/export_mesh.py --out data/mesh
-# the app streams audio from audio/: download the Drive folder and put the mp3s there
-mkdir -p audio && cp /path/to/your/mp3s/*.mp3 audio/
-```
+unzip -o ~/Downloads/spotimind_data.zip -d data
+uv run --with nilearn --with nibabel scripts/export_mesh.py --out data/mesh   # once
+cp /path/to/your/mp3s/*.mp3 audio/                                            # the player streams from here
 
-### 3. Run
-
-```bash
-cd backend && uv run uvicorn app.main:app --port 8000     # defaults: ../data and ../audio
+cd backend && uv run uvicorn app.main:app --port 8000
 cd frontend && npm run dev
 ```
 
-Optional explanations: put the line `GEMINI_API_KEY=your-key` in `backend/.env` (gitignored; never put a real key in any committed file) or export it before starting the backend. The model defaults to `gemini-3.8-flash` (`GEMINI_MODEL`). When Gemini is overloaded (429/503), the backend retries twice, then tries `gemini-3.5-flash` (`GEMINI_FALLBACK_MODEL`), then shows a "try again in a minute" message. Without a key the "why?" buttons are disabled.
+**Adding songs later:** drop the new mp3s in both `MyDrive/spotimind/audio` and `audio/`, rerun the notebook (it skips what's done) and unzip again.
 
-Frontend env: `NEXT_PUBLIC_API_BASE` (default `http://localhost:8000`), e.g. in `frontend/.env.local`.
+**The "Why?" button:** create `backend/.env` with the line `GEMINI_API_KEY=your-key` ([get one here](https://aistudio.google.com/apikey)). That file is gitignored; never put a key in a file that gets committed. Without a key the button is simply disabled. If Gemini is busy, it retries and falls back to an older model before giving up.
 
-### Adding songs later
+<details>
+<summary>Under the hood</summary>
 
-Drop new mp3s into the Drive folder and rerun the notebook. Already-processed songs are skipped. Embeddings are recomputed for the whole catalog at the end, because z-scoring is catalog-level. Then re-download the zip and copy the new mp3s into `audio/`.
+**Pipeline**
 
-## First catalog run (100 songs, 2026-10-04)
+1. **Prediction.** Each song (capped at 5 min) goes through TRIBE v2 with audio only: `[seconds, 20,484 points on the cortex]`. The first 3 s and last 2 s are dropped because the model is unreliable at the edges of any input.
+2. **Regions and networks.** The points are averaged into 400 brain regions ([Schaefer 2018](https://github.com/ThomasYeoLab/CBIG/tree/master/stable_projects/brain_parcellation/Schaefer2018_LocalGlobal)), grouped into Yeo's 7 networks, plus auditory cortex split out using the Destrieux atlas. Every value is a plain average, and every assumption is written down in `data/networks.json`.
+3. **Fingerprint.** Each song becomes 928 numbers: the mean and spread of every region, plus the shape of each network over 16 slices of the song. Features are compared across the whole catalog, not per song, so differences between songs survive.
+4. **Audio baseline.** The same Wav2Vec-BERT features TRIBE listens with, averaged over the song (2,048 numbers).
+5. **Matching.** Cosine similarity with NumPy. No database, no vector store, just files.
 
-- 100/100 songs, 0 failures, 38 min on a free T4 (356 min of audio, 6.4 s compute per audio-minute including Drive I/O).
-- Neighbors in raw-audio space cluster mostly by artist (same voice and production). Brain-space neighbors cross artists and languages.
-- Mean top-10 overlap between the two spaces: Jaccard 0.138, vs about 0.053 for random lists. The spaces are related but clearly not the same.
-- Catalog-average network means are highest for auditory (+0.061), then visual (+0.037), consistent with the Phase 0 caveat.
+**Stack**
 
-## Unverified / known issues
+- **Colab** notebooks for the GPU part: TRIBE v2, nilearn, nibabel.
+- **FastAPI** backend that loads everything into memory: neighbors, a binary timeline endpoint, audio streaming with seeking, embedded cover art, and Gemini via the Google GenAI SDK. 25 pytest tests run against generated mock data.
+- **Next.js 16** with **react-three-fiber**: the cortex recolors every frame from typed arrays, with no allocations in the render loop. The design follows [`DESIGN.md`](DESIGN.md).
 
-- TRIBE predicts in 100 s windows without overlap, which gives a mild discontinuity at 100 s and 200 s into a song. It is left in, and documented.
-- The vertex order (left then right hemisphere) was checked indirectly (left/right symmetry r=0.97), not against an official statement in the TRIBE repo.
-- Five lateral superior-temporal parcels overlap auditory anatomy but stay in Yeo's default network, because the carve-out only takes somatomotor parcels.
+```
+notebooks/   00_phase0_feasibility (what TRIBE actually outputs, speed, sanity checks), 01_embed_catalog
+scripts/     export_mesh.py, make_mock_data.py, atlas.py
+backend/     FastAPI app + tests
+frontend/    Next.js app
+docs/        DATA_CONTRACT.md: every file and endpoint, the single source of truth
+```
+
+**Known issues**
+
+- TRIBE predicts in 100-second windows with no overlap, so there's a small jump at 1:40 and 3:20 into a song.
+- The left/right order of TRIBE's output was checked indirectly (the two hemispheres respond almost identically, r = 0.97), not confirmed by the TRIBE repo.
+- Five superior-temporal regions overlap auditory anatomy but stay in Yeo's default network, because only somatomotor regions are moved to auditory.
+
+</details>
+
+## License
+
+TRIBE v2's code and weights are [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/), so this is a non-commercial project. Audio files, model weights and keys are never committed.
+
+Inspired by [Reeled In](https://github.com/sxnnywu/reeled-in), which used TRIBE v2 to score short videos, and a TRIBE-on-songs demo by @Baconbrix.

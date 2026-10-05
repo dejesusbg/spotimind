@@ -1,4 +1,4 @@
-# Project: "Brain Feel" — match songs by predicted brain response (TRIBE v2), portfolio demo
+# Project: "Spotimind" — match songs by predicted brain response (TRIBE v2), portfolio demo
 
 You are building a portfolio project end to end. Read this whole document before writing any code, then start with a short plan and proceed in the order given in "Delivery order".
 
@@ -60,7 +60,7 @@ Goals, each printed clearly at the end as a checklist:
 7. Verify we can also obtain the raw audio-feature embedding (Wav2Vec-BERT features) for the baseline: either from TRIBE's internals or by loading `facebook/w2v-bert-2.0` via transformers separately.
 
 ### 5.1 Main notebook — catalog embedding
-- Mount Drive; read mp3s from a configurable folder (e.g. `MyDrive/brain-feel/audio`). Config cell: `MAX_SECONDS` (default 300 for full songs), `WINDOW_MODE` flag (use a 90 s window from the song's middle instead), `TRIM_SECONDS` (initial transient), `N_BINS = 16`.
+- Mount Drive; read mp3s from a configurable folder (e.g. `MyDrive/spotimind/audio`). Config cell: `MAX_SECONDS` (default 300 for full songs), `WINDOW_MODE` flag (use a 90 s window from the song's middle instead), `TRIM_SECONDS` (initial transient), `N_BINS = 16`.
 - **Incremental and resumable:** after each song, write its timeline and a per-song feature record to Drive. On rerun, skip songs already processed. (Free Colab sessions disconnect; this is mandatory. It is also how new songs get added later: drop the mp3 in the folder and rerun.)
 - Reduce the TRIBE output to **parcels** using an established atlas that matches the output space (e.g. Schaefer or Glasser/HCP-MMP via nilearn, a few hundred parcels). Save parcel-level timelines `[T, P]`.
 - **Networks:** group parcels into a small set of interpretable networks (aim for ~6: auditory, language, visual, motion/somatomotor, attention, default-mode), using a published mapping (e.g. Yeo 7/17 networks overlaid on the parcellation, plus an explicit auditory-cortex selection from the atlas's labeled regions). **Only real averages over parcels, no invented scores.** Document every assumption in `networks.json`; if a network can't be defined cleanly from the atlas, drop it rather than fake it.
@@ -102,7 +102,7 @@ Runs on `localhost:3000`, calls the FastAPI backend (configurable base URL via e
 ## 7. Repo layout (suggested)
 
 ```
-brain-feel/
+spotimind/
   README.md
   .gitignore
   docs/DATA_CONTRACT.md

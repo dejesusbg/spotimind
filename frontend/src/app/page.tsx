@@ -177,7 +177,7 @@ export default function Home() {
           </header>
 
           <div className="space-y-8 px-6 pb-10">
-            <section className="grid gap-4 2xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+            <section className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
               <div className="relative h-[440px] overflow-hidden rounded-lg bg-surface shadow-[var(--shadow-card)]">
                 {mesh ? (
                   <BrainViewer mesh={mesh} timeline={timeline} range={range} audioRef={audioRef} view={view} />
