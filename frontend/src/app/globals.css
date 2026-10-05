@@ -51,9 +51,12 @@ body {
 /* Seek / range input: white track that turns green on hover, like a music player */
 input[type="range"].seek {
   -webkit-appearance: none; appearance: none; height: 4px; border-radius: 9999px; cursor: pointer;
-  background: linear-gradient(to right, var(--text) var(--fill, 0%), #4d4d4d var(--fill, 0%));
+  --played: var(--text);
+  background:
+    linear-gradient(to right, var(--played) var(--fill, 0%), transparent var(--fill, 0%)),
+    linear-gradient(to right, #3a3a3a var(--tl0, 0%), #5e5e5e var(--tl0, 0%), #5e5e5e var(--tl1, 100%), #3a3a3a var(--tl1, 100%));
 }
-input[type="range"].seek:hover { background: linear-gradient(to right, var(--green) var(--fill, 0%), #4d4d4d var(--fill, 0%)); }
+input[type="range"].seek:hover { --played: var(--green); }
 input[type="range"].seek::-webkit-slider-thumb {
   -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #fff; opacity: 0;
   box-shadow: rgba(0, 0, 0, 0.5) 0px 2px 4px;

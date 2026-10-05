@@ -258,8 +258,8 @@ export default function Home() {
       </div>
 
       {/* Now-playing bar */}
-      <div className="shrink-0 rounded-lg bg-black">
-        {song ? <AudioPlayer key={song.id} song={song} audioRef={audioRef} /> : <div className="h-[88px]" />}
+      <div className="shrink-0 bg-black">
+        {song ? <AudioPlayer key={song.id} song={song} audioRef={audioRef} /> : <div className="h-[72px]" />}
       </div>
     </div>
   );

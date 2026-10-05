@@ -96,9 +96,9 @@ cd backend && uv run uvicorn app.main:app --port 8000     # defaults: ../data an
 cd frontend && npm run dev
 ```
 
-Optional explanations: put `GEMINI_API_KEY=...` in `backend/.env` (gitignored, see `backend/.env.example`) or export it before starting the backend. The model defaults to `gemini-3.8-flash` (`GEMINI_MODEL`). When Gemini is overloaded (429/503), the backend retries twice, then tries `gemini-3.5-flash` (`GEMINI_FALLBACK_MODEL`), then shows a "try again in a minute" message. Without a key the "why?" buttons are disabled.
+Optional explanations: put the line `GEMINI_API_KEY=your-key` in `backend/.env` (gitignored; never put a real key in any committed file) or export it before starting the backend. The model defaults to `gemini-3.8-flash` (`GEMINI_MODEL`). When Gemini is overloaded (429/503), the backend retries twice, then tries `gemini-3.5-flash` (`GEMINI_FALLBACK_MODEL`), then shows a "try again in a minute" message. Without a key the "why?" buttons are disabled.
 
-Frontend env: `NEXT_PUBLIC_API_BASE` (default `http://localhost:8000`), see `frontend/.env.example`.
+Frontend env: `NEXT_PUBLIC_API_BASE` (default `http://localhost:8000`), e.g. in `frontend/.env.local`.
 
 ### Adding songs later
 

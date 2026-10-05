@@ -52,12 +52,13 @@ export default function AudioPlayer({ song, audioRef }: Props) {
   };
 
   const fill = duration ? (time / duration) * 100 : 0;
-  // Bracket = the part of the song that has a brain timeline (after trims / 5-minute cap).
-  const tlStart = (song.timeline_start_s / duration) * 100;
-  const tlEnd = (Math.min(song.timeline_start_s + song.processed_duration_s, duration) / duration) * 100;
+  // The part of the song with a brain timeline (after trims / 5-minute cap) is drawn slightly lighter in the track.
+  const tl0 = (song.timeline_start_s / duration) * 100;
+  const tl1 = (Math.min(song.timeline_start_s + song.processed_duration_s, duration) / duration) * 100;
+  const trackVars = { "--fill": `${fill}%`, "--tl0": `${tl0}%`, "--tl1": `${tl1}%` } as React.CSSProperties;
 
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,1fr)] items-center gap-4 px-4 py-3">
+    <div className="grid h-[72px] grid-cols-[minmax(180px,1fr)_minmax(0,2fr)_minmax(120px,1fr)] items-center gap-4 px-2">
       {/* The element lives here; the 3D view reads its currentTime every frame. */}
       <audio ref={audioRef} src={api.audioUrl(song.id)} preload="metadata" />
 
@@ -69,50 +70,44 @@ export default function AudioPlayer({ song, audioRef }: Props) {
         </div>
       </div>
 
-      <div className="flex flex-col items-center gap-1.5">
-        <div className="flex items-center gap-5">
+      <div className="mx-auto flex w-full max-w-[722px] flex-col items-center gap-1">
+        <div className="flex items-center gap-6">
           <button onClick={() => seek(Math.max(0, time - 10))} className="text-muted transition hover:text-white" aria-label="Back 10 seconds" title="Back 10 s">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" /></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" /></svg>
           </button>
           <button
             onClick={toggle}
             aria-label={playing ? "Pause" : "Play"}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black transition hover:scale-105"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-black transition hover:scale-105"
           >
             {playing ? (
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="2" width="3.5" height="12" rx="1" /><rect x="9.5" y="2" width="3.5" height="12" rx="1" /></svg>
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="2" width="3.5" height="12" rx="1" /><rect x="9.5" y="2" width="3.5" height="12" rx="1" /></svg>
             ) : (
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2.5v11a.5.5 0 0 0 .76.43l9-5.5a.5.5 0 0 0 0-.86l-9-5.5A.5.5 0 0 0 4 2.5Z" /></svg>
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M4.5 2.5v11a.5.5 0 0 0 .76.43l9-5.5a.5.5 0 0 0 0-.86l-9-5.5a.5.5 0 0 0-.76.43Z" /></svg>
             )}
           </button>
           <button onClick={() => seek(Math.min(duration, time + 10))} className="text-muted transition hover:text-white" aria-label="Forward 10 seconds" title="Forward 10 s">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 1 1-3-6.7L21 8" /><path d="M21 3v5h-5" /></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M21 12a9 9 0 1 1-3-6.7L21 8" /><path d="M21 3v5h-5" /></svg>
           </button>
         </div>
         <div className="flex w-full items-center gap-2">
-          <span className="w-10 text-right text-[11px] tabular-nums text-muted">{formatTime(time)}</span>
-          <div className="relative flex-1">
-            <div
-              className="pointer-events-none absolute -top-2 h-1 border-x border-t border-muted/40"
-              style={{ left: `${tlStart}%`, width: `${tlEnd - tlStart}%` }}
-              title="Part of the song with a brain timeline"
-            />
-            <input
-              type="range" min={0} max={duration || 1} step={0.1} value={time}
-              onChange={(e) => seek(Number(e.target.value))}
-              className="seek relative w-full"
-              style={{ "--fill": `${fill}%` } as React.CSSProperties}
-              aria-label="Seek"
-            />
-          </div>
-          <span className="w-10 text-[11px] tabular-nums text-muted">{formatTime(duration)}</span>
+          <span className="w-10 shrink-0 text-right text-[11px] tabular-nums text-muted">{formatTime(time)}</span>
+          <input
+            type="range" min={0} max={duration || 1} step={0.1} value={time}
+            onChange={(e) => seek(Number(e.target.value))}
+            className="seek min-w-0 flex-1"
+            style={trackVars}
+            aria-label="Seek"
+            title="Lighter part of the track = covered by the brain timeline"
+          />
+          <span className="w-10 shrink-0 text-[11px] tabular-nums text-muted">{formatTime(duration)}</span>
         </div>
       </div>
 
-      <div className="hidden justify-end text-right text-[11px] leading-tight text-muted md:flex">
+      <div className="hidden justify-end pr-2 text-right text-[11px] leading-tight text-muted md:flex">
         <span>
           brain timeline<br />
-          {formatTime(song.timeline_start_s)}–{formatTime(song.timeline_start_s + song.processed_duration_s)}
+          <span className="tabular-nums">{formatTime(song.timeline_start_s)}–{formatTime(song.timeline_start_s + song.processed_duration_s)}</span>
         </span>
       </div>
     </div>
