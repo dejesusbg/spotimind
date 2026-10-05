@@ -22,7 +22,8 @@ I ran it on 101 of my own songs: 38 minutes on a free T4, no failures.
 
 - **The raw sound mostly finds the same artist.** Laufey's *How I Get* gets three more Laufey songs as its audio neighbors.
 - **The brain view crosses artists and languages.** The same song's brain neighbors are Olivia Rodrigo's *traitor* and *drivers license*, and Chase Elliott's *unless you leave*.
-- **The two views overlap, but not much.** On average 14% of the top-10 neighbors are shared (Jaccard 0.138), against about 5% for random lists. They're related, but they're clearly not the same thing.
+- **The two views overlap, but not much.** On average only 2.3 of a song's top-10 neighbors show up in both lists (10 would be identical, about 1 would be pure chance). 84% of the brain view's top-5 matches are songs the audio view doesn't suggest.
+- **The raw audio keeps recommending the same artist.** A song's single closest audio match is by the same artist half the time (50%). In the brain view that drops to 10%.
 
 ![Brain-space and audio neighbors side by side, with a Gemini explanation of one match](docs/neighbors.png)
 
