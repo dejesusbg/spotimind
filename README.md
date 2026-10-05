@@ -6,7 +6,7 @@ Streaming apps decide two songs are alike from numbers like tempo, energy or who
 
 The model is Meta's [TRIBE v2](https://github.com/facebookresearch/tribev2), which predicts fMRI brain activity from audio without a scanner. It runs once over your songs on a free Colab GPU. After that, the app runs on your laptop, no GPU needed.
 
-![Spotimind showing Laufey's How I Get, its predicted brain response on a 3D cortex and its brain networks](docs/screenshot.jpg)
+![Spotimind showing Laufey's How I Get, its predicted brain response on a 3D cortex and its brain networks](docs/screenshot.png)
 
 ## What you see
 
@@ -24,7 +24,7 @@ I ran it on 101 of my own songs: 38 minutes on a free T4, no failures.
 - **The brain view crosses artists and languages.** The same song's brain neighbors are Olivia Rodrigo's *traitor* and *drivers license*, and Chase Elliott's *unless you leave*.
 - **The two views overlap, but not much.** On average 14% of the top-10 neighbors are shared (Jaccard 0.138), against about 5% for random lists. They're related, but they're clearly not the same thing.
 
-![Brain-space and audio neighbors side by side, with a Gemini explanation of one match](docs/neighbors.jpg)
+![Brain-space and audio neighbors side by side, with a Gemini explanation of one match](docs/neighbors.png)
 
 ## Honest limits
 
@@ -112,4 +112,4 @@ docs/        DATA_CONTRACT.md: every file and endpoint, the single source of tru
 
 TRIBE v2's code and weights are [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/), so this is a non-commercial project. Audio files, model weights and keys are never committed.
 
-Inspired by [Reeled In](https://github.com/sxnnywu/reeled-in), which used TRIBE v2 to score short videos, and a TRIBE-on-songs demo by @Baconbrix.
+Inspired by [Reeled In](https://github.com/sxnnywu/reeled-in), which used TRIBE v2 to score short videos.
